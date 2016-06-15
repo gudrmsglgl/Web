@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+						
+<mapper namespace="messageDAO">
+
+	<insert	id="writeMyMessageToOtherUser"
+			parameterType="MessageVO">
+		INSERT INTO MESSAGE (
+								MESSAGE_ID
+								, CATEGORY_ID
+								, SEND_CONTENT
+								, KEYWORD_FIRST
+								, KEYWORD_SECOND
+								, SEND_WRITE_DATE
+								, SEND_MEMBER_ID
+								, RECEIVE_MEMBER_ID
+							)
+		VALUES				(
+								'MESSAGE_NUMBER-' || TO_CHAR(SYSDATE,'YYYYMMDD') || '-' || LPAD(MESSAGE_ID_SEQ.NEXTVAL, 8, '0')
+								, #{categoryId}
+								, #{sendContent}
+								, #{keywordFirst}
+								, #{keywordSecond}
+								, SYSDATE
+								, #{sendMemberId}
+								, #{receiveMemberId}
+							)
+	</insert>
+	
+	<insert	id="insertExpertMessage"
+			parameterType="MessageVO">
+		INSERT INTO EXPERT_MESSAGE (
+								EXPERT_MESSAGE_ID
+								, CATEGORY_ID
+								, EXPERT_SEND_SUBJECT
+								, EXPERT_SEND_CONTENT
+								, SEND_WRITE_DATE
+								, SEND_MEMBER_ID
+								, RECEIVE_MEMBER_ID
+							)
+		VALUES				(
+								'EXPERT_MESSAGE_NUMBER-' || TO_CHAR(SYSDATE,'YYYYMMDD') || '-' || LPAD(EXPERT_MESSAGE_SEQ.NEXTVAL, 8, '0')
+								, #{categoryId}
+								, #{expertSendSubject}
+								, #{expertSendContent}
+								, SYSDATE
+								, #{sendMemberId}
+								, #{receiveMemberId}
+							)
+	</insert>
+	
+	
+	 <select id="selectCountAllMessageList" resultType="_int">
+    		SELECT COUNT(MESSAGE_ID)
+    		FROM	MESSAGE
+    </select>
+    
+    
+    
+    
+    <resultMap id="selectAllMessageListMap" type="MessageVO">
+    		<id property="messageId" column="MESSAGE_ID" />
+    		<result property="categoryId" column="CATEGORY_ID"/>
+    		<result property="keywordFirst" column="KEYWORD_FIRST"/>
+    		<result property="keywordSecond" column="KEYWORD_SECOND"/>
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+    		<result property="sendContent" column="SEND_CONTENT"/>    		
+    		<result property="sendWriteDate" column="SEND_WRITE_DATE"/>
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+						
+			<result property="expertMessageId" column="EXPERT_MESSAGE_ID"/>
+			<result property="expertSendSubject" column="EXPERT_SEND_SUBJECT"/>			
+			<result property="expertSendContent" column="EXPERT_SEND_CONTENT"/>		
+			<result property="expertReceiveSubject" column="EXPERT_RECEIVE_SUBJECT"/>		
+			<result property="expertReceiveContent" column="EXPERT_RECEIVE_CONTENT"/>
+						
+    </resultMap>
+    
+    
+    
+    <select id="selectAllMessageList" parameterType="Paging" resultMap="selectAllMessageListMap">
+    		SELECT MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  ,MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT	   MESSAGE_ID
+    			  			  ,CATEGORY_ID
+			    			  ,KEYWORD_FIRST    
+			    			  ,KEYWORD_SECOND
+			    			  ,SEND_MEMBER_ID
+			    			  ,SEND_CONTENT	
+			    			  ,SEND_WRITE_DATE	
+			    			  ,RECEIVE_MEMBER_ID
+			    			  ,RECEIVE_CONTENT
+			    			  ,RECEIVE_WRITE_DATE	
+	    			FROM MESSAGE
+	    			ORDER BY MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM <![CDATA[<=]]>  #{endArticleNumber}
+    		    )
+    		WHERE RNUM >=  #{startArticleNumber}
+    </select>
+    
+    
+    
+    <!-- 관리자 페이지 상세보기 -->
+    
+    
+    <resultMap id="selectMessageByMessageIdMap" type="MessageVO">
+			<id property="messageId" column="MESSAGE_ID" />
+			<result property="keywordFirst" column="KEYWORD_FIRST" />
+			<result property="keywordSecond" column="KEYWORD_SECOND" />
+			<result property="categoryId" column="CATEGORY_ID" />
+			<result property="sendContent" column="SEND_CONTENT" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+			
+			
+			
+		    <result property="expertMessageId" column="EXPERT_MESSAGE_ID"/>
+			
+			<result property="expertSendSubject" column="EXPERT_SEND_SUBJECT"/>
+			
+			<result property="expertSendContent" column="EXPERT_SEND_CONTENT"/>
+			
+			<result property="expertReceiveSubject" column="EXPERT_RECEIVE_SUBJECT"/>
+			
+			<result property="expertReceiveContent" column="EXPERT_RECEIVE_CONTENT"/>
+			
+	</resultMap>
+	
+	
+	<select id="selectMessageByMessageId" 
+			parameterType="string"
+			resultMap="selectMessageByMessageIdMap">
+			
+			SELECT	MESSAGE_ID
+					, CATEGORY_ID
+					, KEYWORD_FIRST
+					, KEYWORD_SECOND
+					, SEND_CONTENT
+					, RECEIVE_CONTENT
+					, SEND_WRITE_DATE
+					, RECEIVE_WRITE_DATE
+					, SEND_MEMBER_ID
+					, RECEIVE_MEMBER_ID
+			FROM	MESSAGE
+			WHERE	MESSAGE_ID = #{messageId}					
+	</select>
+	
+	
+	<delete id="deleteMessage" parameterType="String">
+			DELETE
+			FROM	MESSAGE
+			WHERE	MESSAGE_ID = #{messageId}
+	</delete>
+    
+
+    
+  <!--   랜덤 메세지 -->
+
+ 	<select id="countPickUpMessageCount" parameterType="MessageSearchVO"  resultType="_int">
+    		SELECT  COUNT(MESSAGE_ID)
+			FROM    MEMBER SENDER
+			        , MESSAGE M 
+			WHERE   M.SEND_MEMBER_ID = SENDER.MEMBER_ID
+			AND     SENDER.MEMBER_ID != #{memberId}
+			AND     M.SEND_WRITE_DATE > SYSDATE - 7
+			AND     M.RECEIVE_MEMBER_ID = #{memberId}
+            AND		M.RECEIVE_CONTENT IS NULL
+    </select>
+    
+    
+    
+    
+    <resultMap id="countPickUpMessageMap" type="MessageVO">
+    		<id property="messageId" column="MESSAGE_ID" />
+    		<result property="sendMemberId" column="SEND_MEMBER_ID"/>
+    		<result property="categoryId" column="CATEGORY_ID"/>
+    		<result property="keywordFirst" column="KEYWORD_FIRST"/>
+    		<result property="keywordSecond" column="KEYWORD_SECOND"/>
+    		<result property="sendContent" column="SEND_CONTENT"/>    		
+    		<result property="sendWriteDate" column="SEND_WRITE_DATE"/>
+    </resultMap>
+    
+    
+    
+    <select id="countPickUpMessage" parameterType="MessageSearchVO" resultMap="countPickUpMessageMap">
+				SELECT  M.*
+				FROM    MEMBER SENDER
+				        , MESSAGE M 
+				WHERE   M.SEND_MEMBER_ID = SENDER.MEMBER_ID
+				AND     SENDER.MEMBER_ID != #{memberId}
+				AND     M.SEND_WRITE_DATE > SYSDATE - 7
+				AND     M.RECEIVE_MEMBER_ID = #{memberId}
+				AND		M.RECEIVE_CONTENT IS NULL
+				AND     M.MESSAGE_ID = (
+			                           	 SELECT  M.MESSAGE_ID
+			                           	 FROM    (
+                                        		SELECT  *
+                                       	 FROM    (
+                                                    SELECT  M.*
+                                                    FROM    MEMBER SENDER
+                                                            , MESSAGE M 
+                                                    WHERE   M.SEND_MEMBER_ID = SENDER.MEMBER_ID
+                                                    AND     SENDER.MEMBER_ID != #{memberId}
+                                                    AND     M.SEND_WRITE_DATE > SYSDATE - 7
+                                                    AND     M.RECEIVE_MEMBER_ID = #{memberId}
+                                                    AND		M.RECEIVE_CONTENT IS NULL
+                                                    ORDER 	BY DBMS_RANDOM.RANDOM()
+                                                )
+                                        WHERE   ROWNUM <![CDATA[<=]]> #{count}
+                                        AND		ROWNUM = 1
+                                    ) M
+                       		 )
+    	</select>
+    
+    
+      <update id="pickupAnswer" parameterType="int">
+       UPDATE   MESSAGE
+          <set>
+             <if test="receiveContent != null">
+                RECEIVE_CONTENT = #{receiveContent}, 
+                RECEIVE_WRITE_DATE = SYSDATE
+             </if>
+          </set>
+       WHERE   MESSAGE_ID = #{messageId}
+       </update>
+ 
+
+
+      <!--  메세지 스킵 -->
+       <update id="pickupMessageSkip" parameterType="MessageVO">
+       	  UPDATE   MESSAGE
+          <set>
+             <if test="receiveMemberId != null">
+                RECEIVE_MEMBER_ID = #{receiveMemberId}
+             </if>
+          </set>
+      		 WHERE   MESSAGE_ID = #{messageId}
+       </update>
+       
+
+
+
+       <!-- 상대방에게 답변받은 메시지 보는 쿼리  -->
+          <select id="confirmMyMessageWithOtherUsersCommentCount" resultType="_int">
+       	SELECT	COUNT(MESSAGE_ID)
+       	FROM	MESSAGE
+       	WHERE	SEND_MEMBER_ID = #{memberId}
+       	                   	AND		RECEIVE_CONTENT IS NOT NULL
+                   	AND		RECEIVE_WRITE_DATE IS NOT NULL
+       </select>
+       
+       
+   <resultMap id="confirmMyMessageWithOtherUsersCommentMap" type="MessageVO">
+			<id property="messageId" column="MESSAGE_ID" />
+			<result property="keywordFirst" column="KEYWORD_FIRST" />
+			<result property="keywordSecond" column="KEYWORD_SECOND" />
+			<result property="categoryId" column="CATEGORY_ID" />
+			<result property="sendContent" column="SEND_CONTENT" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+	</resultMap>
+	
+	
+	<select id="confirmMyMessageWithOtherUsersComment" parameterType="MemberVO"
+			resultMap="confirmMyMessageWithOtherUsersCommentMap">
+			SELECT MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  ,MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT	   MESSAGE_ID
+    			  			  ,CATEGORY_ID
+			    			  ,KEYWORD_FIRST    
+			    			  ,KEYWORD_SECOND
+			    			  ,SEND_MEMBER_ID
+			    			  ,SEND_CONTENT	
+			    			  ,SEND_WRITE_DATE	
+			    			  ,RECEIVE_MEMBER_ID
+			    			  ,RECEIVE_CONTENT
+			    			  ,RECEIVE_WRITE_DATE	
+	    			FROM     MESSAGE 
+                   	WHERE   SEND_MEMBER_ID = #{memberId}
+                   	AND		RECEIVE_CONTENT IS NOT NULL
+                   	AND		RECEIVE_WRITE_DATE IS NOT NULL
+	    			ORDER BY MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+				
+	</select>
+	
+
+	
+	<!-- 보관함 receive bottle box 답변을 받은 내 고민함   -->
+        <select id="confirmMessageBoxCount" resultType="_int">
+       	SELECT	COUNT(MESSAGE_ID)
+       	FROM	MESSAGE
+       	WHERE	SEND_MEMBER_ID = #{memberId}
+       	                   	AND		RECEIVE_CONTENT IS NOT NULL
+                   	AND		RECEIVE_WRITE_DATE IS NOT NULL
+       </select>
+       
+       
+   <resultMap id="confirmMessageBoxMap" type="MessageVO">
+			<id property="messageId" column="MESSAGE_ID" />
+			<result property="keywordFirst" column="KEYWORD_FIRST" />
+			<result property="keywordSecond" column="KEYWORD_SECOND" />
+			<result property="categoryId" column="CATEGORY_ID" />
+			<result property="sendContent" column="SEND_CONTENT" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+	</resultMap>
+	
+	
+	<select id="confirmMessageBox" parameterType="MemberVO"
+			resultMap="confirmMessageBoxMap">
+			SELECT MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  ,MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT	   MESSAGE_ID
+    			  			  ,CATEGORY_ID
+			    			  ,KEYWORD_FIRST    
+			    			  ,KEYWORD_SECOND
+			    			  ,SEND_MEMBER_ID
+			    			  ,SEND_CONTENT	
+			    			  ,SEND_WRITE_DATE	
+			    			  ,RECEIVE_MEMBER_ID
+			    			  ,RECEIVE_CONTENT
+			    			  ,RECEIVE_WRITE_DATE	
+	    			FROM     MESSAGE 
+                   	WHERE   SEND_MEMBER_ID = #{memberId}
+                   	AND		RECEIVE_CONTENT IS NOT NULL
+                   	AND		RECEIVE_WRITE_DATE IS NOT NULL
+	    			ORDER BY MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+				
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 보관함 send bottle box 내가 답변해준 보관함  -->
+	
+	 <select id="confirmSendBoxCount" resultType="_int">
+       	SELECT	COUNT(MESSAGE_ID)
+       	FROM	MESSAGE
+       	WHERE	RECEIVE_MEMBER_ID = #{memberId}
+       	                   	AND		RECEIVE_CONTENT IS NOT NULL
+                   	AND		RECEIVE_WRITE_DATE IS NOT NULL
+       </select>
+       
+       
+   <resultMap id="confirmSendBoxMap" type="MessageVO">
+			<id property="messageId" column="MESSAGE_ID" />
+			<result property="keywordFirst" column="KEYWORD_FIRST" />
+			<result property="keywordSecond" column="KEYWORD_SECOND" />
+			<result property="categoryId" column="CATEGORY_ID" />
+			<result property="sendContent" column="SEND_CONTENT" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+	</resultMap>
+	
+	
+	<select id="confirmSendBox" parameterType="MemberVO"
+			resultMap="confirmSendBoxMap">
+			SELECT MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  ,MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT	   MESSAGE_ID
+    			  			  ,CATEGORY_ID
+			    			  ,KEYWORD_FIRST    
+			    			  ,KEYWORD_SECOND
+			    			  ,SEND_MEMBER_ID
+			    			  ,SEND_CONTENT	
+			    			  ,SEND_WRITE_DATE	
+			    			  ,RECEIVE_MEMBER_ID
+			    			  ,RECEIVE_CONTENT
+			    			  ,RECEIVE_WRITE_DATE	
+	    			FROM     MESSAGE 
+                   	WHERE   RECEIVE_MEMBER_ID = #{memberId}
+                   	AND		RECEIVE_CONTENT IS NOT NULL
+                   	AND		RECEIVE_WRITE_DATE IS NOT NULL
+	    			ORDER BY MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+				
+	</select>
+	
+
+	
+	<!-- 삭제된 메시지 7일이 지난 메세지  -->
+	
+          <select id="deletedMyMessageBecauseItIsUnsolvedDuringSevenDaysCount" resultType="_int">
+       	SELECT	COUNT(MESSAGE_ID)
+       	FROM	MESSAGE
+       	WHERE	SEND_MEMBER_ID = #{memberId}
+       	AND		RECEIVE_CONTENT IS NULL
+        AND		RECEIVE_WRITE_DATE IS NULL
+        AND		SEND_WRITE_DATE <![CDATA[<=]]> SYSDATE - 7
+       </select>
+       
+       
+   <resultMap id="deletedMyMessageBecauseItIsUnsolvedDuringSevenDaysMap" type="MessageVO">
+			<id property="messageId" column="MESSAGE_ID" />
+			<result property="keywordFirst" column="KEYWORD_FIRST" />
+			<result property="keywordSecond" column="KEYWORD_SECOND" />
+			<result property="categoryId" column="CATEGORY_ID" />
+			<result property="sendContent" column="SEND_CONTENT" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+	</resultMap>
+	
+	
+	<select id="deletedMyMessageBecauseItIsUnsolvedDuringSevenDays" parameterType="MemberVO"
+			resultMap="deletedMyMessageBecauseItIsUnsolvedDuringSevenDaysMap">
+			SELECT MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  ,MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT	   MESSAGE_ID
+    			  			  ,CATEGORY_ID
+			    			  ,KEYWORD_FIRST    
+			    			  ,KEYWORD_SECOND
+			    			  ,SEND_MEMBER_ID
+			    			  ,SEND_CONTENT	
+			    			  ,SEND_WRITE_DATE	
+			    			  ,RECEIVE_MEMBER_ID
+			    			  ,RECEIVE_CONTENT
+			    			  ,RECEIVE_WRITE_DATE	
+	    			FROM     MESSAGE 
+                   	WHERE   SEND_MEMBER_ID = #{memberId}
+       				AND		RECEIVE_CONTENT IS NULL
+        			AND		RECEIVE_WRITE_DATE IS NULL
+     			    AND		SEND_WRITE_DATE <![CDATA[<=]]> SYSDATE - 7
+	    			ORDER BY MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+				
+	</select>
+  
+  
+  
+  
+  
+  <!-- 처리가 안된  메시지 -->
+          <select id="unsolvedMyFreshMessageCount" resultType="_int">
+       	SELECT	COUNT(MESSAGE_ID)
+       	FROM	MESSAGE
+       	WHERE	SEND_MEMBER_ID = #{memberId}
+       	AND		RECEIVE_CONTENT IS NULL
+        AND		RECEIVE_WRITE_DATE IS NULL
+        AND		SEND_WRITE_DATE > SYSDATE - 7
+       </select>
+       
+       
+   <resultMap id="unsolvedMyFreshMessageMap" type="MessageVO">
+			<id property="messageId" column="MESSAGE_ID" />
+			<result property="keywordFirst" column="KEYWORD_FIRST" />
+			<result property="keywordSecond" column="KEYWORD_SECOND" />
+			<result property="categoryId" column="CATEGORY_ID" />
+			<result property="sendContent" column="SEND_CONTENT" />
+			<result property="receiveContent" column="RECEIVE_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="receiveWriteDate" column="RECEIVE_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+			<result property="receiveMemberId" column="RECEIVE_MEMBER_ID" />
+	</resultMap>
+	
+	
+	<select id="unsolvedMyFreshMessage" parameterType="MemberVO"
+			resultMap="unsolvedMyFreshMessageMap">
+			SELECT MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  ,MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,KEYWORD_FIRST    
+    			  ,KEYWORD_SECOND
+    			  ,SEND_MEMBER_ID
+    			  ,SEND_CONTENT	
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT	   MESSAGE_ID
+    			  			  ,CATEGORY_ID
+			    			  ,KEYWORD_FIRST    
+			    			  ,KEYWORD_SECOND
+			    			  ,SEND_MEMBER_ID
+			    			  ,SEND_CONTENT	
+			    			  ,SEND_WRITE_DATE	
+			    			  ,RECEIVE_MEMBER_ID
+			    			  ,RECEIVE_CONTENT
+			    			  ,RECEIVE_WRITE_DATE	
+	    			FROM     MESSAGE 
+                   	WHERE   SEND_MEMBER_ID = #{memberId}
+       				AND		RECEIVE_CONTENT IS NULL
+        			AND		RECEIVE_WRITE_DATE IS NULL
+     			    AND		SEND_WRITE_DATE > SYSDATE - 7
+	    			ORDER BY MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+				
+	</select>
+	
+	
+	<select id = "expertMessageBoxFromUserCount" resultType="_int" >
+		SELECT	COUNT(EXPERT_MESSAGE_ID)
+		FROM	EXPERT_MESSAGE
+		WHERE	RECEIVE_MEMBER_ID = #{memberId}
+		AND		EXPERT_RECEIVE_CONTENT IS NULL
+		AND		EXPERT_RECEIVE_SUBJECT IS NULL
+	</select>
+	
+	<resultMap id = "expertMessageBoxFromUserMap" type="MessageVO" >
+		<id property = "expertMessageId" column = "EXPERT_MESSAGE_ID" />
+		<result property = "expertSendSubject" column = "EXPERT_SEND_SUBJECT" />
+		<result property = "expertSendContent" column = "EXPERT_SEND_CONTENT" />
+		<result property = "expertReceiveSubject" column = "EXPERT_RECEIVE_SUBJECT" />
+		<result property = "expertReceiveContent" column = "EXPERT_RECEIVE_CONTENT" />
+		<result property = "sendWriteDate" column = "SEND_WRITE_DATE" />
+		<result property = "receiveWriteDate" column = "RECEIVE_WRITE_DATE" />
+		<result property = "sendMemberId" column = "SEND_MEMBER_ID" />
+		<result property = "receiveMemberId" column = "RECEIVE_MEMBER_ID" />
+		<result property = "categoryId" column = "CATEGORY_ID" />
+		
+	</resultMap>
+	
+	<select	id="expertMessageBoxFromUser" parameterType = "MemberVO"
+			resultMap = "expertMessageBoxFromUserMap" >
+		SELECT  EXPERT_MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,SEND_MEMBER_ID
+    			  ,EXPERT_SEND_SUBJECT	
+    			  ,EXPERT_SEND_CONTENT
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,EXPERT_RECEIVE_SUBJECT
+    			  ,EXPERT_RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  , EXPERT_MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,SEND_MEMBER_ID
+    			  ,EXPERT_SEND_SUBJECT	
+    			  ,EXPERT_SEND_CONTENT
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,EXPERT_RECEIVE_SUBJECT
+    			  ,EXPERT_RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT  EXPERT_MESSAGE_ID
+    			  			,CATEGORY_ID
+    						,SEND_MEMBER_ID
+    			  			,EXPERT_SEND_SUBJECT	
+    			  			,EXPERT_SEND_CONTENT
+    			 			,SEND_WRITE_DATE	
+    			 			,RECEIVE_MEMBER_ID
+    			  			,EXPERT_RECEIVE_SUBJECT
+    			  			,EXPERT_RECEIVE_CONTENT
+    			  			,RECEIVE_WRITE_DATE	
+	    			FROM    EXPERT_MESSAGE 
+                   	WHERE   RECEIVE_MEMBER_ID = #{memberId}
+                   	AND		EXPERT_RECEIVE_CONTENT IS NULL
+	    			ORDER BY EXPERT_MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM  <![CDATA[<=]]>  #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+    		
+			
+	</select>	
+	
+	
+	<resultMap id="angangMap" type="MessageVO">
+			<id property="expertMessageId" column="EXPERT_MESSAGE_ID" />
+			<result property="expertSendSubject" column="EXPERT_SEND_SUBJECT" />
+			<result property="expertSendContent" column="EXPERT_SEND_CONTENT" />
+			<result property="sendWriteDate" column="SEND_WRITE_DATE" />
+			<result property="sendMemberId" column="SEND_MEMBER_ID" />
+	</resultMap>
+	
+	
+	<select id="angang" parameterType="string"
+			resultMap="angangMap">
+			SELECT	EXPERT_MESSAGE_ID
+					, EXPERT_SEND_SUBJECT
+					, EXPERT_SEND_CONTENT
+					, SEND_WRITE_DATE
+					, SEND_MEMBER_ID
+			FROM	EXPERT_MESSAGE
+			WHERE	EXPERT_MESSAGE_ID = #{expertMessageId}				
+	</select>
+	
+	<update id="doExpertPickupAnswerToUser" parameterType="MessageVO" >
+	
+		UPDATE	EXPERT_MESSAGE
+        SET		EXPERT_RECEIVE_SUBJECT = #{expertReceiveSubject}
+                ,EXPERT_RECEIVE_CONTENT = #{expertReceiveContent} 
+                ,RECEIVE_WRITE_DATE = SYSDATE
+
+       WHERE   EXPERT_MESSAGE_ID = #{expertMessageId}
+       </update>
+
+
+
+
+
+
+	<select id="expertCompleteBottleCount" resultType="_int">
+		SELECT	COUNT(EXPERT_MESSAGE_ID)
+		FROM	EXPERT_MESSAGE
+		WHERE	SEND_MEMBER_ID = #{memberId}
+		AND		EXPERT_RECEIVE_CONTENT IS NOT NULL
+		AND		EXPERT_RECEIVE_SUBJECT IS NOT NULL
+		
+	</select>
+	
+	<resultMap id = "expertCompleteBottleMap" type="MessageVO" >
+		<id property = "expertMessageId" column = "EXPERT_MESSAGE_ID" />
+		<result property = "expertSendSubject" column = "EXPERT_SEND_SUBJECT" />
+		<result property = "expertSendContent" column = "EXPERT_SEND_CONTENT" />
+		<result property = "expertReceiveSubject" column = "EXPERT_RECEIVE_SUBJECT" />
+		<result property = "expertReceiveContent" column = "EXPERT_RECEIVE_CONTENT" />
+		<result property = "sendWriteDate" column = "SEND_WRITE_DATE" />
+		<result property = "receiveWriteDate" column = "RECEIVE_WRITE_DATE" />
+		<result property = "sendMemberId" column = "SEND_MEMBER_ID" />
+		<result property = "receiveMemberId" column = "RECEIVE_MEMBER_ID" />
+		<result property = "categoryId" column = "CATEGORY_ID" />
+		
+	</resultMap>
+	
+	<select id="expertCompleteBottle" parameterType="MessageVO" 
+			resultMap = "expertCompleteBottleMap" >
+		SELECT  EXPERT_MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,SEND_MEMBER_ID
+    			  ,EXPERT_SEND_SUBJECT	
+    			  ,EXPERT_SEND_CONTENT
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,EXPERT_RECEIVE_SUBJECT
+    			  ,EXPERT_RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE
+    		FROM (
+    			SELECT ROWNUM AS RNUM
+    			  , EXPERT_MESSAGE_ID
+    			  ,CATEGORY_ID
+    			  ,SEND_MEMBER_ID
+    			  ,EXPERT_SEND_SUBJECT	
+    			  ,EXPERT_SEND_CONTENT
+    			  ,SEND_WRITE_DATE	
+    			  ,RECEIVE_MEMBER_ID
+    			  ,EXPERT_RECEIVE_SUBJECT
+    			  ,EXPERT_RECEIVE_CONTENT
+    			  ,RECEIVE_WRITE_DATE	
+    			FROM ( 
+	    			SELECT  EXPERT_MESSAGE_ID
+    			  			,CATEGORY_ID
+    						,SEND_MEMBER_ID
+    			  			,EXPERT_SEND_SUBJECT	
+    			  			,EXPERT_SEND_CONTENT
+    			 			,SEND_WRITE_DATE	
+    			 			,RECEIVE_MEMBER_ID
+    			  			,EXPERT_RECEIVE_SUBJECT
+    			  			,EXPERT_RECEIVE_CONTENT
+    			  			,RECEIVE_WRITE_DATE	
+	    			FROM    EXPERT_MESSAGE 
+                   	WHERE   SEND_MEMBER_ID = #{memberId}
+                   	AND		EXPERT_RECEIVE_CONTENT IS NOT NULL
+                   	AND		EXPERT_RECEIVE_SUBJECT IS NOT NULL
+	    			ORDER BY EXPERT_MESSAGE_ID DESC
+    		         )
+    		WHERE ROWNUM  <![CDATA[<=]]>  #{endArticleNumber}
+    		    )
+    		WHERE RNUM >= #{startArticleNumber}
+    		
+		
+	</select>
+
+</mapper>

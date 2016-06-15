@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+						
+<mapper namespace="memberDAO">
+
+	<insert id="insertMember" parameterType="MemberVO">
+		INSERT INTO MEMBER (
+								MEMBER_ID
+								,MEMBER_NAME
+								,MEMBER_PASSWORD
+								,EMAIL
+								,REGIST_DATE
+								,GRADE_ID
+								,MY_POINT
+							)
+		VALUES 				(
+								#{memberId}
+								,#{memberName}
+								,#{memberPassword}
+								,#{email}
+								,SYSDATE
+								,'일반'
+								,'500'
+							)	
+	</insert>
+	
+	<!-- 전문가 회원가입 쿼리 -->
+	<insert id="insertExpertMember" parameterType="MemberVO">
+		INSERT INTO MEMBER (
+								MEMBER_ID
+								, MEMBER_NAME
+								, MEMBER_PASSWORD
+								, REGIST_DATE
+								, LICENSE_NUMBER
+								, BANK_NUMBER
+								, EMAIL
+								, GRADE_ID
+								, MY_POINT
+								, PHONE_NUMBER
+								, BANK_ID
+							)
+		VALUES				(
+								#{memberId}
+								, #{memberName}
+								, #{memberPassword}
+								, SYSDATE
+								, #{licenseNumber}
+								, #{bankNumber}
+								, #{email}
+								, '상담전문가'
+								, '500'
+								, #{phoneNumber}
+								, #{bankId}
+							)
+	</insert>
+	
+	
+	
+	<select id="selectCountByMemberId"
+			parameterType="string"
+			resultType="_int">
+			
+			SELECT	COUNT(MEMBER_ID)
+			FROM	MEMBER
+			WHERE	MEMBER_ID = #{memberId}
+	</select>
+	
+	<select id="selectCountAllMember" resultType="_int">
+			SELECT	COUNT(MEMBER_ID)
+			FROM	MEMBER
+	</select>
+	
+	
+	
+	
+	<select id="selectRandomMember" parameterType="_int" resultType="string">
+		SELECT  MEMBER_ID
+		FROM    (
+        			SELECT	MEMBER_ID
+					FROM 	MEMBER
+					ORDER BY DBMS_RANDOM.RANDOM()
+				)
+		WHERE   ROWNUM <![CDATA[<=]]> #{count}
+        AND     ROWNUM = 1
+	</select>
+	
+	
+	
+	
+	<select id="selectCountByMemberIdAndPassword"
+			parameterType="string"
+			resultType="_int">
+			
+			SELECT	COUNT(MEMBER_ID)
+			FROM	MEMBER
+			WHERE	MEMBER_ID = #{memberId}
+			AND		MEMBER_PASSWORD = #{memberPassword}
+	</select>
+	
+	
+	
+	<resultMap id="selectMemberInfoByMemberIdAndPasswordMap" type="MemberVO">
+		<id property = "memberId" column="MEMBER_ID" />
+		<result property="memberPassword" column="MEMBER_PASSWORD" />
+		<result property="memberName" column="MEMBER_NAME" />
+		<result property="email" column="EMAIL"/>
+		<result property="gradeId" column="GRADE_ID"/>
+		<result property="myPoint" column="MY_POINT"/>		
+	</resultMap>
+		
+	<select id="selectMemberInfoByMemberIdAndPassword" parameterType="MemberVO"
+			resultMap = "selectMemberInfoByMemberIdAndPasswordMap" >
+		SELECT	MEMBER_ID
+				, MEMBER_PASSWORD
+				, MEMBER_NAME
+				, EMAIL
+				, GRADE_ID
+				, MY_POINT
+		FROM	MEMBER
+		WHERE	MEMBER_ID = #{memberId}
+		AND		MEMBER_PASSWORD = #{memberPassword}
+	</select>
+	
+	
+	
+<resultMap id="confirmInformationMap" type="MemberVO">
+		<id property = "memberId" column="MEMBER_ID" />
+		<result property="memberPassword" column="MEMBER_PASSWORD" />
+		<result property="memberName" column="MEMBER_NAME" />
+		<result property="email" column="EMAIL" />
+		<result property="registDate" column="REGIST_DATE" />
+		<result property="myPoint" column="MY_POINT" />
+	</resultMap>
+	
+	<select id="confirmInformation"
+			parameterType="MemberVO"
+			resultMap="confirmInformationMap">
+		SELECT  MEMBER_ID
+				, MEMBER_PASSWORD
+     	   		, MEMBER_NAME
+     	 		, EMAIL
+     	   		, REGIST_DATE
+     	   		, MY_POINT
+		FROM    MEMBER
+		WHERE   MEMBER_ID = #{memberId}
+	</select>
+
+	
+	
+	<update id="updateMemberInfo" parameterType="MemberVO">
+		UPDATE	MEMBER
+			<set>
+				<if test="memberPassword !=null">
+					MEMBER_PASSWORD = #{memberPassword},
+				</if>
+				<if test="email !=null">
+					EMAIL = #{email}
+				</if>
+			</set>
+		WHERE	MEMBER_ID = #{memberId}
+	</update>
+	
+	
+	<delete id="deleteMember"
+			parameterType="string">
+			DELETE	
+			FROM	MEMBER
+			WHERE	MEMBER_ID = #{memberId}
+	</delete>
+	
+	
+	<!-- 포인트 차감 쿼리 (일반유저에게) ty  -->		
+	<update id="byeMyPoint" parameterType="memberVO">
+		UPDATE	MEMBER
+		SET		MY_POINT = #{myPoint}-50
+		WHERE	MEMBER_ID = #{memberId}
+	
+	</update>
+	
+	<!-- 포인트 차감 쿼리 (전문가에게) ty  -->		
+	<update id="byeMyPointExpert" parameterType="memberVO">
+		UPDATE	MEMBER
+		SET		MY_POINT = #{myPoint}-1000
+		WHERE	MEMBER_ID = #{memberId}
+	
+	</update>
+	
+	<!-- 포인트 적립 쿼리 (일반유저에게) ty  -->		
+	<update id="hiPointExpert" parameterType="memberVO">
+		UPDATE	MEMBER
+		SET		MY_POINT = #{myPoint} + 50
+		WHERE	MEMBER_ID = #{memberId}
+	
+	</update>
+	
+	
+	
+	<update id="payPoint1000" parameterType="memberVO">
+		UPDATE	MEMBER
+		SET		MY_POINT = #{myPoint} + 1000
+		WHERE	MEMBER_ID = #{memberId}
+	
+	</update>
+	
+	
+	
+	
+</mapper>

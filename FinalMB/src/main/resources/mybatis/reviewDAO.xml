@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+						
+<mapper namespace="reviewDAO">
+
+
+	<insert id="insertArticle" parameterType="reviewVO">
+		INSERT INTO REVIEW (
+								ARTICLE_ID
+								, SUBJECT
+								, CONTENT
+								, WRITER
+								, WRITE_DATE
+							)
+		VALUES				(
+								TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || LPAD(ARTICLE_ID_SEQ.NEXTVAL,6,'0')
+								, #{subject}
+								, #{content}
+								, #{writer}
+								, SYSDATE
+							)
+	</insert>
+	
+	<select id="selectCountAllArticleList" resultType="_int" parameterType="ReviewSearchVO">
+		SELECT	COUNT(ARTICLE_ID)
+		FROM	REVIEW
+		<if test="searchType != null">
+				<where>
+					<foreach item="searchType" index="index" collection="searchType">
+							<if test="searchType == 'subject'">
+								SUBJECT LIKE '%' || #{searchKeyword} || '%'
+							</if>
+							<if test ="searchType == 'content'">
+								OR		CONTENT LIKE '%' || #{searchKeyword} || '%'
+							</if>
+					</foreach>
+				</where>
+			</if>
+	</select>
+	
+	<resultMap id="selectAllArticleListMap" type="ReviewVO">
+		<id	property="articleId" column="ARTICLE_ID" />
+		<result property="subject" column="SUBJECT" />
+		<result property="writer" column="WRITER" />
+		<result property="writeDate" column="WRITE_DATE" />
+	</resultMap>
+	
+	<select id="selectAllArticleList" parameterType="Paging" resultMap="selectAllArticleListMap">
+		SELECT	ARTICLE_ID
+				, SUBJECT
+				, WRITER
+				, WRITE_DATE
+				, MODIFY_DATE
+		FROM	(
+					SELECT	ROWNUM AS RNUM
+							, ARTICLE_ID
+							, SUBJECT
+							, WRITER
+							, WRITE_DATE
+							, MODIFY_DATE
+					FROM	(
+								SELECT	ARTICLE_ID
+										, SUBJECT
+										, WRITER
+										, WRITE_DATE
+										, MODIFY_DATE
+								FROM 	REVIEW
+								<if test="searchType != null">
+									<where>
+										<foreach item="searchType" index="index" collection="searchType">
+												<if test="searchType == 'subject'">
+													SUBJECT LIKE '%' || #{searchKeyword} || '%'
+												</if>
+												<if test ="searchType == 'content'">
+													OR		CONTENT LIKE '%' || #{searchKeyword} || '%'
+												</if>
+										</foreach>
+									</where>
+								</if>
+								ORDER	BY WRITE_DATE DESC
+							)
+					WHERE	ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+				)
+		WHERE	RNUM >= #{startArticleNumber}
+	</select>
+	
+	<resultMap id="selectArticleByArticleIdMap" type="ReviewVO">
+		<id property="articleId" column="ARTICLE_ID" />
+		<result property="subject" column="SUBJECT" />
+		<result property="content" column="CONTENT" />
+		<result property="writer" column="WRITER" />
+		<result property="writeDate" column="WRITE_DATE" />
+	</resultMap>
+	
+	<select id="selectArticleByArticleId" parameterType="string"
+			resultMap="selectArticleByArticleIdMap">
+			SELECT	ARTICLE_ID
+					, SUBJECT
+					, CONTENT
+					, WRITER
+					, WRITE_DATE
+			FROM	REVIEW
+			WHERE	ARTICLE_ID = #{articleId}
+	</select>
+	
+	<delete id="deleteArticle" parameterType="string">
+		DELETE
+		FROM	REVIEW
+		WHERE	ARTICLE_ID = #{articleId}
+	</delete>
+	
+	<update id="updateArticle" parameterType="ReviewVO">
+		UPDATE	REVIEW
+		<set>
+			<if test="subject != null">
+				SUBJECT = #{subject},
+			</if>
+			<if test="content != null">
+				CONTENT = #{content}
+			</if>
+		</set>
+		WHERE	ARTICLE_ID = #{articleId}
+	</update>
+	
+</mapper>

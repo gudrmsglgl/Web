@@ -1,0 +1,8 @@
+div.tooltip {
+	background-color: #ffff71;
+	border: 1px solid #d5d500;
+	border-radius: 2px; 
+	padding: 2px 2px;
+	position:absolute;
+	z-index: 1;
+}

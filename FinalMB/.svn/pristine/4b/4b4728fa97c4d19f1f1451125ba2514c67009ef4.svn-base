@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+							   "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<typeAliases>
+		<typeAlias alias="MemberVO" type="com.ktds.eatit.member.vo.MemberVO" />
+
+		<typeAlias alias="MessageVO" type="com.ktds.eatit.message.vo.MessageVO" />
+
+		<typeAlias alias="Paging" type="com.ktds.eatit.message.util.Paging" />
+
+
+		<typeAlias alias="NoticeVO" type="com.ktds.eatit.notice.vo.NoticeVO" />
+
+		<typeAlias alias="NoticeSearchVO" type="com.ktds.eatit.notice.vo.NoticeSearchVO" />
+
+		<typeAlias alias="QABoardVO" type="com.ktds.eatit.qaboard.vo.QABoardVO" />
+
+		<typeAlias alias="QABoardSearchVO" type="com.ktds.eatit.qaboard.vo.QABoardSearchVO" />
+
+		<typeAlias alias="MessageSearchVO" type="com.ktds.eatit.message.vo.MessageSearchVO" />
+		
+		<typeAlias alias="FreeVO" type="com.ktds.eatit.free.vo.FreeVO" />
+		
+		<typeAlias alias="FreeSearchVO" type="com.ktds.eatit.free.vo.FreeSearchVO"/>
+		
+		<typeAlias	alias="ReviewVO" type="com.ktds.eatit.review.vo.ReviewVO"/>
+		
+		<typeAlias alias="ReviewSearchVO" type="com.ktds.eatit.review.vo.ReviewSearchVO"/>
+
+	</typeAliases>
+
+	<mappers>
+
+		<mapper resource="/mybatis/memberDAO.xml" />
+		<mapper resource="/mybatis/messageDAO.xml" />
+		<mapper resource="/mybatis/noticeDAO.xml" />
+		<mapper resource="/mybatis/qaboardDAO.xml" />
+		<mapper resource="/mybatis/freeDAO.xml" />
+		<mapper resource="/mybatis/reviewDAO.xml" />
+
+	</mappers>
+
+</configuration>

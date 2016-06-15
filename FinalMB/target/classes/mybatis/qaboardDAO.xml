@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0 //EN"
+							"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="qABoardDAO">
+
+	<insert id="insertArticle" parameterType="qABoardVO">
+		INSERT INTO QABOARD (
+								ARTICLE_ID
+								, SUBJECT
+								, CONTENT
+								, WRITER
+								, WRITE_DATE
+				  		   )
+		VALUES			   (
+								TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || LPAD(ARTICLE_ID_SEQ.NEXTVAL,5,'0')
+								, #{subject}
+								, #{content}
+								, #{writer}
+								, SYSDATE
+						    )				  		   
+		
+	</insert>
+	
+	<select id="selectCountAllArticleList" parameterType="QABoardSearchVO" resultType="_int">
+			SELECT	COUNT(ARTICLE_ID)
+			FROM	QABOARD
+			<if test="searchType != null">
+				<where>
+					<foreach item="searchType" index="index" collection="searchType">
+							<if test="searchType == 'subject'">
+								SUBJECT LIKE '%' || #{searchKeyword} || '%'
+							</if>
+							<if test ="searchType == 'content'">
+								OR		CONTENT LIKE '%' || #{searchKeyword} || '%'
+							</if>
+					</foreach>
+				</where>
+			</if>
+	</select>
+
+	<resultMap id="selectAllArticleListMap" type="qABoardVO">
+			<id property="articleId" column="ARTICLE_ID" />
+			<result property="subject" column="SUBJECT" />
+			<result property="writer" column="WRITER" />
+			<result property="writeDate" column="WRITE_DATE" />
+	</resultMap>
+
+	<select id="selectAllArticleList" parameterType="Paging" resultMap="selectAllArticleListMap">
+		SELECT	ARTICLE_ID
+				, SUBJECT
+				, WRITER
+				, WRITE_DATE
+		FROM    (				
+					SELECT	ROWNUM AS RNUM
+							, ARTICLE_ID
+							, SUBJECT
+							, WRITER
+							, WRITE_DATE
+					FROM    (			
+								SELECT	ARTICLE_ID
+										, SUBJECT
+										, WRITER
+										, WRITE_DATE	
+								FROM	QABOARD
+								<if test="searchType != null">
+									<where>
+										<foreach item="searchType" index="index" collection="searchType">
+												<if test="searchType == 'subject'">
+													SUBJECT LIKE '%' || #{searchKeyword} || '%'
+												</if>
+												<if test ="searchType == 'content'">
+													OR		CONTENT LIKE '%' || #{searchKeyword} || '%'
+												</if>
+										</foreach>
+									</where>
+								</if>
+								ORDER	BY WRITE_DATE DESC		
+							)
+					WHERE	ROWNUM <![CDATA[<=]]> #{endArticleNumber}
+				)
+		WHERE	RNUM >= #{startArticleNumber}		
+	</select>
+	
+	<resultMap id="selectArticleByArticleIdMap" type="qABoardVO">
+			<id property="articleId" column="ARTICLE_ID" />
+			<result property="subject" column="SUBJECT" />
+			<result property="content" column="CONTENT" />
+			<result property="writer" column="WRITER" />
+			<result property="writeDate" column="WRITE_DATE" />
+	</resultMap>
+	
+	
+	<select id="selectArticleByArticleId" parameterType="string"
+			resultMap="selectArticleByArticleIdMap">
+			SELECT	ARTICLE_ID
+					, SUBJECT
+					, CONTENT
+					, WRITER
+					, WRITE_DATE
+			FROM	QABOARD
+			WHERE	ARTICLE_ID = #{articleId}					
+	</select>
+	
+	<delete id="deleteArticle" parameterType="String">
+			
+			DELETE
+			FROM	QABOARD
+			WHERE	ARTICLE_ID = #{articleId}
+			
+	</delete>
+	
+	<update id="updateArticle" parameterType="qABoardVO">
+
+			UPDATE	QABOARD
+			<set>
+				<if test="subject !=null">
+					SUBJECT = #{subject},
+				</if>
+				<if test="content !=null">
+					CONTENT = #{content}
+				</if>				
+			</set>
+			WHERE	ARTICLE_ID = #{articleId}
+			
+	</update>
+					
+</mapper>

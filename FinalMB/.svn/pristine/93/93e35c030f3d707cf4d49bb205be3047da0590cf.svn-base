@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd">
+
+	<mvc:annotation-driven />
+	<mvc:resources 
+		location="/WEB-INF/resources/" 
+		mapping="/resources/**" />
+	
+	<!-- 
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**/" />
+			<mvc:exclude-mapping path="/resources/**/" />
+			<bean	id="measuringInterceptor"
+					class="com.ktds.anytime.interceptors.MeasuringInterceptor" />
+						
+		</mvc:interceptor>
+	</mvc:interceptors>
+	 -->
+
+
+	
+	<bean	id="viewResolver"
+			class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+		<property name="prefix" value="/WEB-INF/view/"></property>
+		<property name="suffix" value=".jsp" />	
+	
+	</bean>	
+	
+	<bean	id="multipartResolver"
+			class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="104857600"> </property>
+		<property name="defaultEncoding" value="UTF-8" />
+	
+	</bean>
+	
+	<bean	id="memberController"
+			class="com.ktds.eatit.member.web.MemberController">
+		<property name="memberBiz" ref="memberBiz" />
+	</bean>
+			
+		<bean	id="messageController"
+			class="com.ktds.eatit.message.web.MessageController">
+		<property name="messageBiz" ref="messageBiz" />
+	</bean>
+	
+		<bean	id="noticeController"
+			class="com.ktds.eatit.notice.web.NoticeController" >
+		<property name="noticeBiz" ref="noticeBiz" />
+	</bean>
+	
+		<bean	id="qABoardController"
+			class="com.ktds.eatit.qaboard.web.QABoardController" >
+		<property name="qABoardBiz" ref="qABoardBiz" />
+	</bean>
+	
+	<bean id="freeController" class="com.ktds.eatit.free.web.FreeController">
+		<property name="freeBiz" ref="freeBiz" />
+	</bean>
+	
+	<bean	id="reviewController"
+			class="com.ktds.eatit.review.web.ReviewController">
+			<property name="reviewBiz" ref="reviewBiz" />	
+	</bean>
+
+</beans>
+
+
+
