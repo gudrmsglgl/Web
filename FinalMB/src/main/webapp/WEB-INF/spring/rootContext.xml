@@ -19,7 +19,7 @@
 
 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
 	<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" /> 
-	<property name="url" value="jdbc:oracle:thin:@192.168.99.100:49161:xe" />
+	<property name="url" value="jdbc:oracle:thin:@주소:포트번호:xe" />
 	 <property name="username" value="MB" /> <property name="password" value="oracle"/>
 </bean>
 
